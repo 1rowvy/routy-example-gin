@@ -34,6 +34,7 @@ jobs:
 
       - name: Run every request and flow
         run: |
-          go build -o shop . && ./shop &
+          go build -o shop .
+          GIN_MODE=release ./shop &
           curl -sf --retry 30 --retry-connrefused --retry-delay 1 http://localhost:8080/health
           routy run api --yes
