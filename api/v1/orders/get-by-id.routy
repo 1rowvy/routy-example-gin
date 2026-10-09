@@ -1,0 +1,14 @@
+// Get order
+// gin internal/api/orders.go:15 → s.GetOrder
+// middleware: AuthRequired(s)
+GET /v1/orders/{id} {
+  handler: s.GetOrder
+  params { id: CreateOrder().body.id }
+  headers { Authorization: "Bearer ${Login().body.token}" }
+
+  expect {
+    status == 200
+    body matches Order
+    body.id == id
+  }
+}

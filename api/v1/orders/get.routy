@@ -1,0 +1,42 @@
+// List orders
+// Orders of the current user, newest first, 20 per page.
+// gin internal/api/orders.go:13 → s.ListOrders
+// middleware: AuthRequired(s)
+GET /v1/orders {
+  handler: s.ListOrders
+
+  params {
+    page: 1
+    status: null
+  }
+
+  query {
+    page
+    status
+  }
+
+  headers { Authorization: "Bearer ${Login().body.token}" }
+
+  expect {
+    status == 200
+    body matches OrderPage
+    body.page == page
+    body.items.length <= 20
+  }
+}
+
+// List paid orders
+// An array in `expect`: every order on the page is paid.
+GET /v1/orders {
+  query {
+    page: 1
+    status: "paid"
+  }
+
+  headers { Authorization: "Bearer ${Login().body.token}" }
+
+  expect {
+    body matches OrderPage
+    body.items.all(o => o.status == "paid")
+  }
+}

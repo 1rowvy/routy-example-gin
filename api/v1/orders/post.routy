@@ -1,0 +1,50 @@
+// SKUs from the catalog in internal/api/store.go; visible in this file only.
+let book = "BOOK-1"
+let mug = "MUG-2"
+
+// Create order
+// Prices come from the catalog; `X-Idempotency-Key` makes retries safe.
+// gin internal/api/orders.go:14 → s.CreateOrder
+// middleware: AuthRequired(s)
+POST /v1/orders {
+  handler: s.CreateOrder
+
+  params {
+    user_id: CreateUser().body.id
+    qty: 2
+    key: uuid()
+  }
+
+  headers {
+    Authorization: "Bearer ${Login().body.token}"
+    X-Idempotency-Key: key
+  }
+
+  body {
+    user_id,
+    items: [{ sku: book, qty }, { sku: mug, qty: 1 }],
+    note: "created ${nowIso()}",
+  }
+
+  expect {
+    status == 201
+    body matches Order
+    body.status == "new"
+    body.total == 12.5 * qty + 8
+    body.items.all(i => i.price > 0)
+    body.items.map(i => i.sku).contains(mug)
+  }
+
+  save order_id = body.id
+}
+
+// Create order with unknown SKU
+POST /v1/orders {
+  headers { Authorization: "Bearer ${Login().body.token}" }
+  body { user_id: CreateUser().body.id, items: [{ sku: "NOPE", qty: 1 }] }
+
+  expect {
+    status == 422
+    body.error.startsWith("unknown sku")
+  }
+}

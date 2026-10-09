@@ -1,0 +1,7 @@
+// Browser session
+// Cookies set by one response are sent with the next ones, like in a browser.
+flow BrowserSession {
+  StartSession()
+  me = Me()
+  expect { me.body.role == "admin" }
+}

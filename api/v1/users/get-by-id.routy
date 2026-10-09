@@ -1,0 +1,21 @@
+// Get user
+// gin internal/api/users.go:14 → s.GetUser
+// middleware: AuthRequired(s)
+GET /v1/users/{id} {
+  handler: s.GetUser
+  params { id: CreateUser().body.id }
+  headers { Authorization: "Bearer ${Login().body.token}" }
+
+  expect {
+    status == 200
+    body matches User
+    body.id == id
+    body.role in ["admin", "customer"]
+  }
+}
+
+// Get missing user
+GET /v1/users/999999 {
+  headers { Authorization: "Bearer ${Login().body.token}" }
+  expect { status == 404 }
+}

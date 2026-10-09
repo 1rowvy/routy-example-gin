@@ -1,0 +1,15 @@
+// Health
+// Liveness probe for load balancers.
+// gin internal/api/router.go:21 → Health
+GET /health {
+  handler: Health
+  timeout: 2s
+
+  expect {
+    status == 200
+    body matches Health
+    body matches schema("./schemas/health.schema.json")
+    headers.content-type.contains("json")
+    duration < 500
+  }
+}

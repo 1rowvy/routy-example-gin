@@ -1,0 +1,26 @@
+// Checkout
+// A new customer buys three books and pays. Every step is a request called
+// like a function; the flow stops at the first failure.
+flow Checkout {
+  user = CreateUser(name: "Bob Stone")
+  order = CreateOrder(user_id: user.body.id, qty: 3)
+  PayOrder(id: order.body.id)
+  paid = WaitUntilPaid(id: order.body.id)
+
+  expect {
+    paid.body.total == 45.5
+    paid.body.user_id == user.body.id
+  }
+
+  save last_order = order.body.id
+}
+
+// Idempotent retry
+// The same `X-Idempotency-Key` twice gives the same order. `fresh` skips the
+// call cache, so the second call really goes to the server.
+flow IdempotentRetry {
+  key = uuid()
+  first = CreateOrder(key)
+  retry = fresh CreateOrder(key)
+  expect { retry.body.id == first.body.id }
+}
