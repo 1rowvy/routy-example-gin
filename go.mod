@@ -1,4 +1,4 @@
-module github.com/1rowvy/routy-example-gin
+module github.com/1rowvy/outry-example-gin
 
 go 1.26.2
 

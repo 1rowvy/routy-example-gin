@@ -1,15 +1,15 @@
-// Shop API — a small gin service used to show what Routy can do.
+// Shop API — a small gin service used to show what Outry can do.
 //
 //	go run .            # listens on :8080
-//	routy run api       # every request and flow against it
-//	routy check         # .routy files, environments, formatting and Go routes
+//	outry run api       # every request and flow against it
+//	outry check         # .outry files, environments, formatting and Go routes
 package main
 
 import (
 	"log"
 	"os"
 
-	"github.com/1rowvy/routy-example-gin/internal/api"
+	"github.com/1rowvy/outry-example-gin/internal/api"
 )
 
 func main() {

@@ -12,7 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/1rowvy/routy-example-gin/internal/model"
+	"github.com/1rowvy/outry-example-gin/internal/model"
 )
 
 // store keeps everything in memory: restart the service to start over.

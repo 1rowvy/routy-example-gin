@@ -14,7 +14,7 @@ jobs:
     env:
       # In a real project both come from `secrets.ADMIN_PASSWORD`.
       ADMIN_PASSWORD: admin # the service
-      ROUTY_ADMIN_PASSWORD: admin # the `admin_password` secret in api/env.toml
+      OUTRY_ADMIN_PASSWORD: admin # the `admin_password` secret in api/env.toml
     steps:
       - uses: actions/checkout@v4
 
@@ -22,19 +22,19 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install Routy
+      - name: Install Outry
         run: |
-          curl -fsSL https://raw.githubusercontent.com/1rowvy/routy/master/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/1rowvy/outry/master/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       # Syntax, names, every environment, formatting — and every request against the
       # Go routes. A drift shows up as an annotation on the changed line in the PR.
       - name: Requests match the code
-        run: routy check --format github
+        run: outry check --format github
 
       - name: Run every request and flow
         run: |
           go build -o shop .
           GIN_MODE=release ./shop &
           curl -sf --retry 30 --retry-connrefused --retry-delay 1 http://localhost:8080/health
-          routy run api --yes
+          outry run api --yes

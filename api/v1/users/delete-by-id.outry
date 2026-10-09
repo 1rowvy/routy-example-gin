@@ -1,4 +1,4 @@
-// Admins only. Limited to dev and asks before sending: `routy run` prompts in a
+// Admins only. Limited to dev and asks before sending: `outry run` prompts in a
 // terminal, `--yes` skips the prompt in CI, the app shows a dialog.
 // gin internal/api/users.go:16 → s.DeleteUser
 // middleware: AuthRequired(s), AdminOnly()

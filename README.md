@@ -1,34 +1,34 @@
-# Routy example: a Gin shop API
+# Outry example: a Gin shop API
 
 A small [Gin](https://github.com/gin-gonic/gin) service and its API described in
-[Routy](https://github.com/1rowvy/routy): requests, checks and scenarios live in `api/` next to the
+[Outry](https://github.com/1rowvy/outry): requests, checks and scenarios live in `api/` next to the
 Go code, run from the terminal, the desktop app, VS Code or CI, and fail the build when the code and
 the requests drift apart.
 
 ## Try it
 
-You need Go and the `routy` CLI:
+You need Go and the `outry` CLI:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/1rowvy/routy/master/install.sh | sh   # Linux
+curl -fsSL https://raw.githubusercontent.com/1rowvy/outry/master/install.sh | sh   # Linux
 ```
 
 On macOS and Windows take the archive from the
-[latest release](https://github.com/1rowvy/routy/releases/latest).
+[latest release](https://github.com/1rowvy/outry/releases/latest).
 
 ```sh
-git clone https://github.com/1rowvy/routy-example-gin && cd routy-example-gin
+git clone https://github.com/1rowvy/outry-example-gin && cd outry-example-gin
 go run . &                         # the shop on :8080, admin password "admin"
-export ROUTY_ADMIN_PASSWORD=admin  # or keep it in the keychain: routy secret set admin_password
-routy run api                      # every request and flow
+export OUTRY_ADMIN_PASSWORD=admin  # or keep it in the keychain: outry secret set admin_password
+outry run api                      # every request and flow
 ```
 
 ```console
-✓ api/auth/login/post.routy  Login  POST http://localhost:8080/auth/login  200 OK  1ms 62B
+✓ api/auth/login/post.outry  Login  POST http://localhost:8080/auth/login  200 OK  1ms 62B
     ✓ status == 200
     ✓ body matches Token
     ✓ body.expires_in == 3600
-✓ api/flows/checkout.routy  Checkout  flow
+✓ api/flows/checkout.outry  Checkout  flow
     ↳ CreateUser  201  0ms
       ↳ Login  cached
     ↳ CreateOrder  201  0ms
@@ -41,11 +41,11 @@ routy run api                      # every request and flow
 22 passed, 0 failed
 ```
 
-`DeleteUser` has `confirm: true`, so `routy run` asks before sending it; `--yes` skips the question.
+`DeleteUser` has `confirm: true`, so `outry run` asks before sending it; `--yes` skips the question.
 
 ## Change the code, watch the requests notice
 
-The requests know which Go handler they belong to (`handler: s.CreateUser`), and Routy reads the
+The requests know which Go handler they belong to (`handler: s.CreateUser`), and Outry reads the
 handler: the struct the body is bound into, query parameters, headers, middleware and the type it
 responds with. Rename a field in `internal/model/model.go`:
 
@@ -57,20 +57,20 @@ responds with. Rename a field in `internal/model/model.go`:
 +	Phone string `json:"phone" binding:"required"`
 ```
 
-Nothing has to compile or run for this — `routy check` reads the source:
+Nothing has to compile or run for this — `outry check` reads the source:
 
 ```console
-$ routy check
-api/v1/users/post.routy:17:8: error: required field `full_name` (string) is missing from body  ← internal/api/users.go:13
-api/v1/users/post.routy:17:8: error: required field `phone` (string) is missing from body  ← internal/api/users.go:13
-api/v1/users/post.routy:17:10: error: body field `name` is not in model.CreateUser  ← internal/api/users.go:13
-14 files, 2 environments, 12 Go routes: 3 errors, 0 warnings; 3 fixable with `routy import go --fix`
+$ outry check
+api/v1/users/post.outry:17:8: error: required field `full_name` (string) is missing from body  ← internal/api/users.go:13
+api/v1/users/post.outry:17:8: error: required field `phone` (string) is missing from body  ← internal/api/users.go:13
+api/v1/users/post.outry:17:10: error: body field `name` is not in model.CreateUser  ← internal/api/users.go:13
+14 files, 2 environments, 12 Go routes: 3 errors, 0 warnings; 3 fixable with `outry import go --fix`
 
-$ routy import go . --fix
+$ outry import go . --fix
 ```
 
 In a pull request the same errors appear as annotations on the changed lines — see
-[`.github/workflows/api.yml`](.github/workflows/api.yml). Add a route and `routy import go .` creates
+[`.github/workflows/api.yml`](.github/workflows/api.yml). Add a route and `outry import go .` creates
 its request, with the body, query, headers and a response check already filled in.
 
 ## What is where
@@ -80,43 +80,43 @@ Every file in `api/` shows something; open them in order.
 | Feature | File |
 |---------|------|
 | Environments, shared variables, a secret, middleware → headers | [`api/env.toml`](api/env.toml) |
-| Checks: status, body fields, headers, timing, a JSON Schema | [`api/health.routy`](api/health.routy), [`api/schemas/`](api/schemas/health.schema.json) |
-| Parameters with defaults, a secret as a parameter, `cache: 50m` between runs | [`api/auth/login/post.routy`](api/auth/login/post.routy) |
-| A negative test next to the main request | [`api/auth/login/post.routy`](api/auth/login/post.routy), [`api/v1/users/post.routy`](api/v1/users/post.routy) |
-| `form` body, the cookie jar, `cookies.session` | [`api/auth/session.routy`](api/auth/session.routy) |
-| Requests calling requests: `Login().body.token`, `CreateUser().body.id`, sent once per run | [`api/v1/users/get-by-id.routy`](api/v1/users/get-by-id.routy) |
-| Calls with arguments: log in as another user | [`api/v1/users/delete-by-id.routy`](api/v1/users/delete-by-id.routy) |
-| `only: [dev]` and `confirm: true` for destructive requests | [`api/v1/users/delete-by-id.routy`](api/v1/users/delete-by-id.routy) |
-| `multipart` upload of a file | [`api/v1/users/avatar/post.routy`](api/v1/users/avatar/post.routy) |
-| File-level `let`, `uuid()`, `nowIso()`, arithmetic, `all` / `map` over arrays, `save` | [`api/v1/orders/post.routy`](api/v1/orders/post.routy) |
-| Query parameters that are left out when `null` | [`api/v1/orders/get.routy`](api/v1/orders/get.routy) |
-| Polling until the order is paid | [`api/v1/orders/pay/post.routy`](api/v1/orders/pay/post.routy) |
-| Flows: a checkout scenario, an idempotent retry with `fresh` | [`api/flows/checkout.routy`](api/flows/checkout.routy) |
-| Shapes generated from Go structs, made stricter by hand | [`api/shapes.routy`](api/shapes.routy) |
+| Checks: status, body fields, headers, timing, a JSON Schema | [`api/health.outry`](api/health.outry), [`api/schemas/`](api/schemas/health.schema.json) |
+| Parameters with defaults, a secret as a parameter, `cache: 50m` between runs | [`api/auth/login/post.outry`](api/auth/login/post.outry) |
+| A negative test next to the main request | [`api/auth/login/post.outry`](api/auth/login/post.outry), [`api/v1/users/post.outry`](api/v1/users/post.outry) |
+| `form` body, the cookie jar, `cookies.session` | [`api/auth/session.outry`](api/auth/session.outry) |
+| Requests calling requests: `Login().body.token`, `CreateUser().body.id`, sent once per run | [`api/v1/users/get-by-id.outry`](api/v1/users/get-by-id.outry) |
+| Calls with arguments: log in as another user | [`api/v1/users/delete-by-id.outry`](api/v1/users/delete-by-id.outry) |
+| `only: [dev]` and `confirm: true` for destructive requests | [`api/v1/users/delete-by-id.outry`](api/v1/users/delete-by-id.outry) |
+| `multipart` upload of a file | [`api/v1/users/avatar/post.outry`](api/v1/users/avatar/post.outry) |
+| File-level `let`, `uuid()`, `nowIso()`, arithmetic, `all` / `map` over arrays, `save` | [`api/v1/orders/post.outry`](api/v1/orders/post.outry) |
+| Query parameters that are left out when `null` | [`api/v1/orders/get.outry`](api/v1/orders/get.outry) |
+| Polling until the order is paid | [`api/v1/orders/pay/post.outry`](api/v1/orders/pay/post.outry) |
+| Flows: a checkout scenario, an idempotent retry with `fresh` | [`api/flows/checkout.outry`](api/flows/checkout.outry) |
+| Shapes generated from Go structs, made stricter by hand | [`api/shapes.outry`](api/shapes.outry) |
 
-Run a single scenario by name — `routy run Checkout` — or a single request — `routy run CreateOrder`.
-`routy check --env staging` checks the staging environment without sending anything.
+Run a single scenario by name — `outry run Checkout` — or a single request — `outry run CreateOrder`.
+`outry check --env staging` checks the staging environment without sending anything.
 
 ## How `api/` was made
 
 ```sh
-routy init            # api/env.toml
-routy import go .     # a request for every Gin route and a shape for every response type
+outry init            # api/env.toml
+outry import go .     # a request for every Gin route and a shape for every response type
 ```
 
 Then the generated requests got checks, parameters and calls, files were moved around (the session
-requests live together in `api/auth/session.routy`) and the flows were written by hand. `routy import`
+requests live together in `api/auth/session.outry`) and the flows were written by hand. `outry import`
 still recognizes every request by its `handler:`.
 
 ## Editors
 
-- **VS Code**: the [Routy extension](https://marketplace.visualstudio.com/items?itemName=routy.routy-vscode)
+- **VS Code**: the [Outry extension](https://marketplace.visualstudio.com/items?itemName=outry.outry-vscode)
   (recommended in `.vscode/extensions.json`) — completion, errors as you type, the Go drift as quick
   fixes, a **Send** lens over every request.
-- **Desktop app**: open the folder in [Routy](https://github.com/1rowvy/routy/releases/latest); the
+- **Desktop app**: open the folder in [Outry](https://github.com/1rowvy/outry/releases/latest); the
   **Routes** tab shows every Gin route and its state.
-- **Neovim, Helix, Zed**: `routy lsp` and the tree-sitter grammar — see the
-  [editors guide](https://1rowvy.github.io/routy/guides/editors/).
+- **Neovim, Helix, Zed**: `outry lsp` and the tree-sitter grammar — see the
+  [editors guide](https://1rowvy.github.io/outry/guides/editors/).
 
 ## Layout
 
@@ -125,8 +125,8 @@ main.go                    starts the server
 internal/api/router.go     routes, groups, middleware
 internal/api/*.go          handlers and the in-memory store
 internal/model/model.go    request and response types
-api/                       the Routy project
-.github/workflows/api.yml  routy check + routy run on every push and PR
+api/                       the Outry project
+.github/workflows/api.yml  outry check + outry run on every push and PR
 ```
 
 The service keeps everything in memory: restart it to start over.
