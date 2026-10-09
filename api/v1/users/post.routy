@@ -1,10 +1,9 @@
-// Create user
 // The email must be unique; the role defaults to "customer".
 // gin internal/api/users.go:13 → s.CreateUser
 // middleware: AuthRequired(s)
 //
 // Call it from other requests to get a fresh customer: `CreateUser().body.id`.
-POST /v1/users {
+CreateUser: POST /v1/users {
   handler: s.CreateUser
 
   params {
@@ -26,9 +25,8 @@ POST /v1/users {
   save user_id = body.id
 }
 
-// Create user without email
 // `binding:"required"` in Go turns into a 400.
-POST /v1/users {
+CreateUserWithoutEmail: POST /v1/users {
   headers { Authorization: "Bearer ${Login().body.token}" }
   body { name: "No Email" }
 

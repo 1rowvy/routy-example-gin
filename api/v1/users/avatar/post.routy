@@ -1,8 +1,7 @@
-// Upload avatar
 // Multipart form with an image in the `file` field.
 // gin internal/api/users.go:15 → s.UploadAvatar
 // middleware: AuthRequired(s)
-POST /v1/users/{id}/avatar {
+UploadAvatar: POST /v1/users/{id}/avatar {
   handler: s.UploadAvatar
   params { id: CreateUser().body.id }
   headers { Authorization: "Bearer ${Login().body.token}" }

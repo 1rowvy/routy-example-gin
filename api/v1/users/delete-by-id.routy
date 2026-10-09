@@ -1,9 +1,8 @@
-// Delete user
 // Admins only. Limited to dev and asks before sending: `routy run` prompts in a
 // terminal, `--yes` skips the prompt in CI, the app shows a dialog.
 // gin internal/api/users.go:16 → s.DeleteUser
 // middleware: AuthRequired(s), AdminOnly()
-DELETE /v1/users/{id} {
+DeleteUser: DELETE /v1/users/{id} {
   handler: s.DeleteUser
   params { id: CreateUser(name: "Temp").body.id }
   only: [dev]
@@ -12,9 +11,8 @@ DELETE /v1/users/{id} {
   expect { status == 204 }
 }
 
-// Delete user as customer
 // Logs in as a freshly created customer: calls take arguments.
-DELETE /v1/users/1 {
+DeleteUserAsCustomer: DELETE /v1/users/1 {
   headers {
     Authorization: "Bearer ${Login(email: CreateUser().body.email, password: "customer").body.token}"
   }

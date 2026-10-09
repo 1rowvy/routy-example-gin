@@ -1,7 +1,6 @@
-// Health
 // Liveness probe for load balancers.
 // gin internal/api/router.go:21 → Health
-GET /health {
+Health: GET /health {
   handler: Health
   timeout: 2s
 

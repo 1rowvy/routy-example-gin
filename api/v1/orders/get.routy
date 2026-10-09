@@ -1,8 +1,7 @@
-// List orders
 // Orders of the current user, newest first, 20 per page.
 // gin internal/api/orders.go:13 → s.ListOrders
 // middleware: AuthRequired(s)
-GET /v1/orders {
+ListOrders: GET /v1/orders {
   handler: s.ListOrders
 
   params {
@@ -25,9 +24,8 @@ GET /v1/orders {
   }
 }
 
-// List paid orders
 // An array in `expect`: every order on the page is paid.
-GET /v1/orders {
+ListPaidOrders: GET /v1/orders {
   query {
     page: 1
     status: "paid"

@@ -1,7 +1,6 @@
-// Start session
 // Browser-style login: a form post that sets the `session` cookie.
 // gin internal/api/router.go:25 → s.StartSession
-POST /auth/session {
+StartSession: POST /auth/session {
   handler: s.StartSession
 
   form {
@@ -15,12 +14,11 @@ POST /auth/session {
   }
 }
 
-// Me
 // The user of the current session. The cookie comes from the run's cookie jar,
 // so this works right after `Start session` — no token, nothing saved by hand.
 // gin internal/api/router.go:26 → s.Me
 // middleware: SessionRequired(s)
-GET /auth/me {
+Me: GET /auth/me {
   handler: s.Me
 
   expect {

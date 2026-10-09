@@ -1,10 +1,9 @@
-// Login
 // Exchanges email and password for a bearer token that lives for an hour.
 // gin internal/api/router.go:24 → s.Login
 //
 // Every request behind AuthRequired calls `Login()` in its headers. Within one
 // run it is sent once; `cache: 50m` keeps the token between runs too.
-POST /auth/login {
+Login: POST /auth/login {
   handler: s.Login
 
   params {
@@ -22,9 +21,8 @@ POST /auth/login {
   }
 }
 
-// Login with wrong password
 // A negative test: only its method and path are compared with the code.
-POST /auth/login {
+LoginWithWrongPassword: POST /auth/login {
   body { email: admin_email, password: "nope" }
 
   expect {

@@ -1,8 +1,7 @@
-// Pay order
 // Payment is asynchronous: the order becomes "pending" and turns "paid" a moment later.
 // gin internal/api/orders.go:16 → s.PayOrder
 // middleware: AuthRequired(s)
-POST /v1/orders/{id}/pay {
+PayOrder: POST /v1/orders/{id}/pay {
   handler: s.PayOrder
   params { id: CreateOrder().body.id }
   headers { Authorization: "Bearer ${Login().body.token}" }
@@ -14,9 +13,8 @@ POST /v1/orders/{id}/pay {
   }
 }
 
-// Wait until paid
 // Repeats the request until the payment provider confirms the order.
-GET /v1/orders/{id} {
+WaitUntilPaid: GET /v1/orders/{id} {
   params { id: PayOrder().body.id }
   headers { Authorization: "Bearer ${Login().body.token}" }
   poll body.status == "paid" every 300ms for 10s

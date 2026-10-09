@@ -2,11 +2,10 @@
 let book = "BOOK-1"
 let mug = "MUG-2"
 
-// Create order
 // Prices come from the catalog; `X-Idempotency-Key` makes retries safe.
 // gin internal/api/orders.go:14 → s.CreateOrder
 // middleware: AuthRequired(s)
-POST /v1/orders {
+CreateOrder: POST /v1/orders {
   handler: s.CreateOrder
 
   params {
@@ -38,8 +37,7 @@ POST /v1/orders {
   save order_id = body.id
 }
 
-// Create order with unknown SKU
-POST /v1/orders {
+CreateOrderWithUnknownSKU: POST /v1/orders {
   headers { Authorization: "Bearer ${Login().body.token}" }
   body { user_id: CreateUser().body.id, items: [{ sku: "NOPE", qty: 1 }] }
 
